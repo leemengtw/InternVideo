@@ -128,6 +128,10 @@ class InternVideo2_CLIP(nn.Module):
         vision_embeds = self.vision_encoder(image, use_image=use_image)
         return vision_embeds
 
+    def get_vid_feat(self, frames):
+        with torch.no_grad():
+            return self.encode_vision(frames)
+
     def encode_text(self, text):
         """encode text.
         Args:

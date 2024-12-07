@@ -17,6 +17,10 @@ batch_size = 256
 batch_size_test = 64
 max_txt_l = 32
 
+# origin_num_frames = 4
+
+distributed = False
+
 inputs = dict(
     image_res=224,
     video_input=dict(
@@ -63,6 +67,7 @@ model = dict(
         checkpoint_num=0,
     ),
     text_encoder=dict(
+        name="",
         use_flash_attn=True,
         transformer_width=4096,
         llama_path="/weka/home-meng/repos/InternVL/clip_benchmark/clip_benchmark/models/internvl_c_pytorch/chinese_alpaca_lora_7b",
@@ -131,8 +136,9 @@ seed = 42
 
 save_latest = False
 save_iter = 500
-auto_resume = True
+auto_resume = False
 pretrained_path = "/weka/home-meng/hf_repos/InternVideo2-CLIP-1B-224p-f8/1B_clip.pth"  # path to pretrained model weights, for resume only?
+
 
 deepspeed = dict(
     enable=False,

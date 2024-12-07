@@ -62,7 +62,7 @@ def setup_model(
 
     if "bert" in config.model.text_encoder.name:
         logger.info(f"Using BertTokenizer: {config.model.text_encoder.pretrained}!")
-        tokenizer = BertTokenizer.from_pretrained(config.model.text_encoder.pretrained, local_files_only=True)
+        tokenizer = BertTokenizer.from_pretrained(config.model.text_encoder.pretrained, local_files_only=False)
         model = model_cls(config=config, tokenizer=tokenizer, is_pretrain=pretrain)
     else:
         model = model_cls(config=config, is_pretrain=pretrain)

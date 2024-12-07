@@ -5,7 +5,7 @@ import os.path as osp
 from os.path import join
 
 import torch
-import deepspeed
+# import deepspeed
 from torch.utils.data import ConcatDataset, DataLoader
 
 from utils.optimizer import create_optimizer
@@ -68,9 +68,13 @@ def setup_model(
                 find_unused_parameters=find_unused_parameters,  # `False` for image-only task
             )
 
-        optimizer = create_optimizer(config.optimizer, model)
-        scheduler = create_scheduler(config.scheduler, optimizer)
-        scaler = torch.cuda.amp.GradScaler(enabled=config.use_half_precision) # This is never used actually if we fixed bf16
+        # optimizer = create_optimizer(config.optimizer, model)
+        # scheduler = create_scheduler(config.scheduler, optimizer)
+        # scaler = torch.cuda.amp.GradScaler(enabled=config.use_half_precision) # This is never used actually if we fixed bf16
+
+        optimizer = None
+        schedulr = None
+        scaler = None
 
     start_epoch = 0
     global_step = 0
@@ -171,9 +175,9 @@ def setup_model(
     return (
         model,
         model_without_ddp,
-        optimizer,
-        scheduler,
-        scaler,
+        None,
+        None,
+        None,
         tokenizer,
         start_epoch,
         global_step,

@@ -51,7 +51,7 @@ model = dict(
         clip_norm_type='l2',
         clip_return_layer=6,
         clip_student_return_interval=1,
-        pretrained='your_model_path/1B_pt.pth',
+        pretrained='/weka/home-meng/hf_repos/InternVideo2-Stage2_1B-224p-f4/InternVideo2-stage2_1b-224p-f4.pt',
         use_checkpoint=True,
         checkpoint_num=40,
         use_flash_attn=True,
@@ -123,7 +123,7 @@ compile_model = False
 # ========================= wandb ==========================
 wandb = dict(
     enable=False,
-    entity="opengvlab",  # username or team name to store the runs, see https://docs.wandb.ai/ref/python/init
+    entity="stablediffusion",  # username or team name to store the runs, see https://docs.wandb.ai/ref/python/init
     project="InternVideo2-Stage2",  # setup in your command line
 )
 dist_url = "env://"
@@ -143,6 +143,6 @@ jump_evaluate = False
 pretrained_path = ""
 
 deepspeed = dict(
-    enable=True,
+    enable=False,
     stage=1,
 )

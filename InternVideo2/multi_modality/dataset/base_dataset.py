@@ -1,3 +1,17 @@
+
+class LocalClient:
+    def __init__(self, config_path=None):
+        self.config_path = config_path
+
+    def get(self, file_path):
+        # 判斷是否為遠端路徑（例如以 http 開頭）
+        if file_path.startswith("http://") or file_path.startswith("https://"):
+            raise NotImplementedError("Remote access not implemented in LocalClient")
+        elif os.path.exists(file_path):
+            with open(file_path, "rb") as f:
+                return f.read()
+        else:
+            raise FileNotFoundError(f"File not found: {file_path}")
 import logging
 import os
 import random
@@ -30,7 +44,7 @@ class BaseDataset(Dataset):
         self.max_audio_length = None
         self.video_reader = None
         self.num_tries = None
-        self.client = Client('~/petreloss.conf') if Client is not None else None
+        self.client = Client('~/petreloss.conf') if Client is not None else LocalClient()
         self.trimmed30 = False
 
     def __getitem__(self, index):

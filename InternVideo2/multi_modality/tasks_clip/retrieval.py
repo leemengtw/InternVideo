@@ -124,8 +124,9 @@ def main(config):
     device = torch.device(config.device)
     cudnn.benchmark = True
 
-    train_loaders, test_name2loaders, train_media_types = setup_dataloaders(config, mode="ret")
-    num_steps_per_epoch = sum(len(d) for d in train_loaders)
+    _, test_name2loaders, train_media_types = setup_dataloaders(config, mode="ret")
+    # num_steps_per_epoch = sum(len(d) for d in train_loaders)
+    num_steps_per_epoch = 1
     config.scheduler.num_training_steps = num_steps_per_epoch * config.scheduler.epochs
     config.scheduler.num_warmup_steps = num_steps_per_epoch * config.scheduler.warmup_epochs
 

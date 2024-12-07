@@ -11,6 +11,7 @@ from models.backbones.bert.builder import build_bert
 from models.criterions import get_sim
 from models.backbones.internvideo2.pos_embed import interpolate_pos_embed_internvideo2_new
 from models.backbones.bert.tokenization_bert import BertTokenizer
+from models.internvideo2_clip import InternVideo2_CLIP
 
 
 def _frame_from_video(video):
@@ -26,13 +27,23 @@ v_std = np.array([0.229, 0.224, 0.225]).reshape(1,1,3)
 def normalize(data):
     return (data/255.0-v_mean)/v_std
 
+v_clip_mean = np.array([0.48145466, 0.4578275, 0.40821073]).reshape(1, 1, 3)
+v_clip_std = np.array([0.26862954, 0.26130258, 0.27577711]).reshape(1, 1, 3)
 
-def frames2tensor(vid_list, fnum=8, target_size=(224, 224), device=torch.device('cuda')):
+def normalize_for_clip(data):
+    return (data/255.0-v_clip_mean)/v_clip_std
+
+
+def frames2tensor(vid_list, model_type, fnum=8, target_size=(224, 224), device=torch.device('cuda')):
     assert(len(vid_list) >= fnum)
     step = len(vid_list) // fnum
     vid_list = vid_list[::step][:fnum]
     vid_list = [cv2.resize(x[:,:,::-1], target_size) for x in vid_list]
-    vid_tube = [np.expand_dims(normalize(x), axis=(0, 1)) for x in vid_list]
+
+    normalize_fn = normalize_for_clip if model_type == "clip" else normalize
+    # print(f"{normalize_fn=}")
+
+    vid_tube = [np.expand_dims(normalize_fn(x), axis=(0, 1)) for x in vid_list]
     vid_tube = np.concatenate(vid_tube, axis=1)
     vid_tube = np.transpose(vid_tube, (0, 1, 4, 2, 3))
     vid_tube = torch.from_numpy(vid_tube).to(device, non_blocking=True).float()
@@ -46,8 +57,20 @@ def get_text_feat_dict(texts, clip, text_feat_d={}):
     return text_feat_d
 
 
-def get_vid_feat(frames, vlm):
-    return vlm.get_vid_features(frames)
+def get_vid_feat(frames, model, config: dict={}, device=torch.device('cuda')):
+    fn = config.get('num_frames', 8)
+    size_t = config.get('size_t', 224)
+
+    model_type = "clip" if "clip" in str(model.__class__).lower() else "stage2"
+
+    frames_tensor = frames2tensor(frames, model_type=model_type, fnum=fn, target_size=(size_t, size_t), device=device)
+    return model.get_vid_feat(frames_tensor)
+
+
+def get_vid_feat_from_mp4path(mp4path, model, config={}):
+    video = cv2.VideoCapture(mp4path)
+    frames = [x for x in _frame_from_video(video)]
+    return get_vid_feat(frames, model, config=config).cpu().float().numpy()
 
 
 def retrieve_text(frames, 
@@ -77,11 +100,14 @@ def retrieve_text(frames,
 
 
 def setup_internvideo2(config: dict):
+    model_cls = eval(config.model.model_cls)
+    print(f"{model_cls=}")
+
     if "bert" in config.model.text_encoder.name:
         tokenizer = BertTokenizer.from_pretrained(config.model.text_encoder.pretrained, local_files_only=True)
         model = InternVideo2_Stage2(config=config, tokenizer=tokenizer, is_pretrain=True)
     else:
-        model = InternVideo2_Stage2(config=config, is_pretrain=True)
+        model = model_cls(config=config, is_pretrain=False)
         tokenizer = model.tokenizer
 
     if config.get('compile_model', False):
@@ -108,6 +134,11 @@ def setup_internvideo2(config: dict):
 
         msg = model_without_ddp.load_state_dict(state_dict, strict=False)
         print(f"load_state_dict: {msg}")
+    
+    if config.get("pretrained_clip_path", None):
+        sd = torch.load(config.pretrained_clip_path, map_location="cpu")
+        msg = model_without_ddp.load_state_dict(sd, strict=False)
+        print(f"load_clip_state_dict: {msg}")
     
     if config.get('use_bf16', False):
         model_without_ddp = model_without_ddp.to(torch.bfloat16)

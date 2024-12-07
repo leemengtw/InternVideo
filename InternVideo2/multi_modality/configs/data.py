@@ -130,8 +130,8 @@ available_corpus["debug"] = [
 
 # ============== for validation =================
 available_corpus["msrvtt_1k_test"] = dict(
-    anno_path="your_path",
-    data_root="",
+    anno_path="/weka/home-meng/data/video/msrvtt/MSRVTT/annotation/msrvtt_test1k.json",
+    data_root="/weka/home-meng/data/video/msrvtt/MSRVTT/videos/all",
     media_type="video"
 )
 
@@ -271,8 +271,8 @@ available_corpus["msrvtt_ret_train9k"] = dict(
 )
 
 available_corpus["msrvtt_ret_test1k"] = dict(
-    anno_path="your_path", 
-    data_root="",
+    anno_path="/weka/home-meng/data/video/msrvtt/MSRVTT/annotation/msrvtt_ret_test1k.json", 
+    data_root="/weka/home-meng/data/video/msrvtt/MSRVTT/videos/all",
     media_type="video",
 )
 

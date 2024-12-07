@@ -1,3 +1,6 @@
+# import sys
+# sys.path.insert(0, "/weka/home-meng/repos/InternVideo/InternVideo2/multi_modality")
+
 import datetime
 import logging
 import time
@@ -560,8 +563,8 @@ def main(config):
 
 
 if __name__ == "__main__":
-    print(f"\033[31m NODE LIST: {os.environ['SLURM_NODELIST']} \033[0m")
-    logger.info(f"NODE LIST: {os.environ['SLURM_NODELIST']}")
+    print(f"\033[31m NODE LIST: {os.environ.get('SLURM_NODELIST', )} \033[0m")
+    logger.info(f"NODE LIST: {os.environ.get('SLURM_NODELIST', )}")
     cfg = setup_main()
     local_broadcast_process_authkey()
     main(cfg)

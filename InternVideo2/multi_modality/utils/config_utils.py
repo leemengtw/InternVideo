@@ -165,6 +165,6 @@ def setup_main():
         logger.info(f"config: {Config.pretty_text(config)}")
         Config.dump(config, os.path.join(config.output_dir, "config.json"))
     
-    dist.barrier()
+    if dist.is_initialized(): dist.barrier()
 
     return config

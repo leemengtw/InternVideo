@@ -148,23 +148,25 @@ def train(
 def setup_dataloaders(config, mode="pt"):
     # train datasets, create a list of data loaders
     logger.info(f"Creating dataset for {mode}")
-    train_datasets = create_dataset(f"{mode}_train", config)
-    media_types = get_media_types(train_datasets)
+    # train_datasets = create_dataset(f"{mode}_train", config)
+    # media_types = get_media_types(train_datasets)
 
     if config.distributed:
         batch_size = [config.inputs.batch_size[k] for k in media_types] # batch_size for each GPU
         samplers = create_stateful_sampler(train_datasets, batch_size)
     else:
-        raise NotImplementedError
+        pass
+        # raise NotImplementedError
 
-    train_loaders = create_loader(
-        train_datasets,
-        samplers,
-        batch_size=[config.inputs.batch_size[k] for k in media_types],
-        num_workers=[config.num_workers] * len(media_types),
-        is_trains=[True] * len(media_types),
-        collate_fns=[None] * len(media_types),
-    )
+    # train_loaders = create_loader(
+    #     train_datasets,
+    #     samplers,
+    #     batch_size=[config.inputs.batch_size[k] for k in media_types],
+    #     num_workers=[config.num_workers] * len(media_types),
+    #     is_trains=[True] * len(media_types),
+    #     collate_fns=[None] * len(media_types),
+    # )
+    train_loaders = None
 
     # test datasets, a mapping from dataset name to data loader
     test_datasets, test_dataset_names = create_dataset(f"{mode}_eval", config)
@@ -177,6 +179,8 @@ def setup_dataloaders(config, mode="pt"):
         collate_fns=[None] * len(test_datasets),
     )
     test_name2loaders = {k: v for k, v in zip(test_dataset_names, test_loaders)}
+
+    media_types = get_media_types(test_datasets)
     return train_loaders, test_name2loaders, media_types
 
 
